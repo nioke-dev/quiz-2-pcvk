@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:mime/mime.dart';
+import 'dart:convert';
+import 'package:http_parser/http_parser.dart'; // Import this for MediaType
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -283,6 +287,63 @@ class PreviewPage extends StatelessWidget {
 
   const PreviewPage({super.key, required this.imagePath});
 
+  Future<void> _sendImageToAPI(String imagePath, BuildContext context) async {
+    try {
+      final uri = Uri.parse(
+          'https://6f51-180-248-45-65.ngrok-free.app/predict'); // Replace with actual API URL
+
+      // Use MediaType.parse() for content type
+      final request = http.MultipartRequest('POST', uri)
+        ..fields['user'] = 'flutter_user' // Optionally add user or other data
+        ..files.add(await http.MultipartFile.fromPath(
+          'file', imagePath,
+          contentType: MediaType.parse('image/jpeg'), // Use MediaType.parse()
+        ));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        // Handle success
+        final responseBody = await response.stream.bytesToString();
+        final decodedResponse = jsonDecode(responseBody);
+
+        // Navigate to the result page with the response data (modify as needed)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultPage(result: decodedResponse),
+          ),
+        );
+      } else {
+        // Handle error
+        print('Failed to upload image. Status Code: ${response.statusCode}');
+        _showErrorDialog(context, 'Error uploading image');
+      }
+    } catch (e) {
+      // Handle error
+      print('Error: $e');
+      _showErrorDialog(context, 'Error occurred: $e');
+    }
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -291,18 +352,12 @@ class PreviewPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.file(File(
-                imagePath)), // Menampilkan gambar yang dipilih atau diambil
+            Image.file(File(imagePath)), // Display the captured image
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                // Navigasi ke halaman hasil setelah preview
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ResultPage(),
-                  ),
-                );
+                // Call the function to send the image to the API
+                _sendImageToAPI(imagePath, context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
@@ -313,8 +368,7 @@ class PreviewPage extends StatelessWidget {
               child: const Text(
                 "Go to Result Page",
                 style: TextStyle(
-                  color: Color.fromARGB(
-                      255, 31, 240, 170), // Mengubah warna teks menjadi biru
+                  color: Color.fromARGB(255, 31, 240, 170),
                 ),
               ),
             ),

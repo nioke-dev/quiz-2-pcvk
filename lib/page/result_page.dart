@@ -81,7 +81,11 @@ class RecyclingMethodItem extends StatelessWidget {
 
 // Halaman hasil pemindaian
 class ResultPage extends StatelessWidget {
-  const ResultPage({Key? key}) : super(key: key);
+  final dynamic result;
+  const ResultPage({
+    Key? key,
+    required this.result,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -121,13 +125,13 @@ class ResultPage extends StatelessWidget {
                     height: 100,
                   ),
                   const SizedBox(width: 16),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Type: Organic Waste',
-                          style: TextStyle(
+                          'Type: ${result['type']}',
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
