@@ -130,7 +130,7 @@ class ResultPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Type: ${result['type']}',
+                          'Type: ${getTranslatedType(result['predicted_class'])}',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -139,7 +139,7 @@ class ResultPage extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Impact: Low Environmental Impact',
+                          'Impact: ${getImpact(result['predicted_class'])}',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight
@@ -182,13 +182,13 @@ class ResultPage extends StatelessWidget {
             //   ),
             // ),
 
-            const ResultCard(
+            ResultCard(
               title: 'Recycling Methods',
               content: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RecyclingMethodItem(
-                    icon: Icons.compost,
+                    icon: Icons.recycling,
                     color: Colors.green,
                   ),
                   SizedBox(width: 16),
@@ -196,17 +196,14 @@ class ResultPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          width: 10,
-                        ),
+                        SizedBox(width: 10),
                         Text(
-                          'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using ',
+                          getRecyclingMethod(result['predicted_class']),
                           style: TextStyle(
                             fontSize: 14,
                             height: 1.5,
                           ),
-                          textAlign:
-                              TextAlign.justify, // Justify text alignment
+                          textAlign: TextAlign.justify,
                         ),
                       ],
                     ),
@@ -216,14 +213,15 @@ class ResultPage extends StatelessWidget {
             ),
 
             // Kartu Dampak Lingkungan
-            const ResultCard(
+            ResultCard(
               title: 'Environmental Impact',
               content: Text(
-                'This organic waste can be composted, which enriches soil and reduces landfill waste, contributing to a healthier environment.',
+                getEnvironmentalImpact(result['predicted_class']),
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.5,
                 ),
+                textAlign: TextAlign.justify,
               ),
             ),
 
@@ -292,5 +290,86 @@ class ResultPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String getTranslatedType(String predictedClass) {
+    switch (predictedClass) {
+      case 'Organic':
+        return 'Organic';
+      case 'botol plastik':
+        return 'Plastic Bottle';
+      case 'kaca':
+        return 'Glass';
+      case 'kardus':
+        return 'Cardboard';
+      case 'kertas':
+        return 'Paper';
+      case 'metal':
+        return 'Metal';
+      case 'plastic':
+        return 'Plastic';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  String getImpact(String predictedClass) {
+    switch (predictedClass.toLowerCase()) {
+      case 'organic':
+        return 'Low Environmental Impact';
+      case 'botol plastik':
+      case 'plastic':
+        return 'High Environmental Impact';
+      case 'kaca':
+      case 'kardus':
+      case 'kertas':
+        return 'Mid Environmental Impact';
+      case 'metal':
+        return 'Low Environmental Impact';
+      default:
+        return 'Unknown Impact';
+    }
+  }
+
+  String getRecyclingMethod(String predictedClass) {
+    switch (predictedClass.toLowerCase()) {
+      case 'organic':
+        return 'Organic waste, such as food scraps and paper, can be composted through microbial decomposition. This process transforms organic matter into nutrient-rich compost, which can be used as a natural fertilizer for agriculture or gardening.';
+      case 'botol plastik':
+        return 'Plastic bottles, typically made of PET, are collected, cleaned, shredded, and melted to produce plastic pellets. These pellets can be reused to manufacture new bottles, textiles, or other plastic products, reducing the need for virgin plastic production.';
+      case 'kaca':
+        return 'Glass is sorted by color, cleaned, and melted down to be remolded into new glass products or used in construction. This process helps conserve raw materials and reduces energy consumption compared to producing new glass.';
+      case 'kardus':
+        return 'Cardboard is shredded, mixed with water to create pulp, and processed into new cardboard or paper products. This recycling method reduces waste and conserves resources like wood and water.';
+      case 'kertas':
+        return 'Recycling paper involves breaking it down into pulp, removing ink, and forming it into new paper sheets. The recycled paper can be used for printing, packaging, or making tissue products, reducing deforestation and water usage.';
+      case 'metal':
+        return 'Metals like aluminum and steel are collected, melted, and reshaped into new products. Since metals can be recycled indefinitely without losing quality, this process saves energy and reduces the need for mining new ores.';
+      case 'plastic':
+        return 'Other types of plastic (HDPE, LDPE, PP) are sorted by resin type, cleaned, shredded, and melted into reusable material. The recycled plastic is then used to create new products such as containers, toys, or construction materials, though not all plastic types can be efficiently recycled.';
+      default:
+        return 'No recycling information available for this material.';
+    }
+  }
+
+  String getEnvironmentalImpact(String predictedClass) {
+    switch (predictedClass.toLowerCase()) {
+      case 'organic':
+        return 'Organic waste can be composted, enriching the soil, reducing landfill waste, and decreasing greenhouse gas emissions, contributing to a healthier environment.';
+      case 'botol plastik':
+        return 'Plastic bottles have a high environmental impact due to their long decomposition time and contribution to ocean pollution. Recycling them reduces waste and conserves resources but requires significant energy.';
+      case 'kaca':
+        return 'Glass has a moderate environmental impact. Recycling it reduces the need for raw materials and energy, as it can be reused indefinitely without loss of quality.';
+      case 'kardus':
+        return 'Cardboard recycling reduces deforestation and waste. It conserves resources like wood and water, minimizing environmental degradation and energy usage in paper production.';
+      case 'kertas':
+        return 'Paper recycling lowers deforestation and water usage while reducing waste in landfills. However, the process consumes energy and water, making it a moderate-impact material.';
+      case 'metal':
+        return 'Metals like aluminum and steel have a low environmental impact when recycled. Recycling saves energy, reduces the need for mining, and prevents resource depletion, as metals can be recycled indefinitely.';
+      case 'plastic':
+        return 'Other types of plastic have a high environmental impact due to limited recycling capabilities and potential harm to ecosystems. Recycling reduces landfill waste but is often energy-intensive.';
+      default:
+        return 'No environmental impact information available for this material.';
+    }
   }
 }
